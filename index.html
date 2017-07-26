@@ -17,7 +17,13 @@
       <div class="col-md-4 right">
         <h4>Mimic Me!</h4>
         <div id="game">
-          <div id="target">?</div>
+          <div id="target" style="display: inline">? </div>
+          <span style="font-size: 14px; display: inline">
+                <button id="skip-btn" style="display: none" 
+                        onclick="setTargetEmoji(chooseRandomEmoji());">
+                        Skip
+                </button>
+            </span>
           <div id="score">Score: 0 / 0</div>
         </div>
         <div id="controls">

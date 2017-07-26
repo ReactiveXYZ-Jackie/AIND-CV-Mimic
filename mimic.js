@@ -25,6 +25,7 @@ var emojis = [ 128528, 9786, 128515, 128524, 128527, 128521, 128535, 128539, 128
 // Update target emoji being displayed by supplying a unicode value
 function setTargetEmoji(code) {
   $("#target").html("&#" + code + ";");
+  currentEmoji = code;
 }
 
 // Convert a special character to its unicode value (can be 1 or 2 units long)
@@ -74,7 +75,15 @@ function onReset() {
   $("#logs").html("");  // clear out previous log
 
   // TODO(optional): You can restart the game as well
-  // <your code here>
+  score = 0;
+  total = 10;
+  setScore(score, total);
+  setTargetEmoji("?");
+  $("#target").html("?");
+  if (detector && detector.isRunning) {
+    detector.removeEventListener();
+    detector.stop();  // stop detector
+  }
 };
 
 // Add a callback to notify when camera access is allowed
@@ -102,7 +111,19 @@ detector.addEventListener("onInitializeSuccess", function() {
   $("#face_video").css("display", "none");
 
   // TODO(optional): Call a function to initialize the game, if needed
-  // <your code here>
+  
+  // a little prompt
+  alert("Let's start mimicing!");
+
+  // init to be 10 rounds
+  setScore(score, total);
+
+  // choose a random emoji to start with
+  setTargetEmoji(chooseRandomEmoji());
+
+  // show the skip button
+  $('#skip-btn').show();
+
 });
 
 // Add a callback to receive the results from processing an image
@@ -133,7 +154,24 @@ detector.addEventListener("onImageResultsSuccess", function(faces, image, timest
     drawEmoji(canvas, image, faces[0]);
 
     // TODO: Call your function to run the game (define it first!)
-    // <your code here>
+    
+    if (toUnicode(faces[0].emojis.dominantEmoji) == currentEmoji) {
+
+      // check if finishes 10 rounds
+      if (score == total) {
+        alert("Fantastic!");
+        onReset();
+        return;
+      }
+
+      // success
+      setScore(++score, total);
+
+      // update next
+      setTargetEmoji(chooseRandomEmoji());
+
+    }
+
   }
 });
 
@@ -181,18 +219,24 @@ function drawEmoji(canvas, img, face) {
 
 }
 
+
 // TODO: Define any variables and functions to implement the Mimic Me! game mechanics
 
-// NOTE:
-// - Remember to call your update function from the "onImageResultsSuccess" event handler above
-// - You can use setTargetEmoji() and setScore() functions to update the respective elements
-// - You will have to pass in emojis as unicode values, e.g. setTargetEmoji(128578) for a simple smiley
-// - Unicode values for all emojis recognized by Affectiva are provided above in the list 'emojis'
-// - To check for a match, you can convert the dominant emoji to unicode using the toUnicode() function
+var currentEmoji, score = 0, total = 1;
 
-// Optional:
-// - Define an initialization/reset function, and call it from the "onInitializeSuccess" event handler above
-// - Define a game reset function (same as init?), and call it from the onReset() function above
+/**
+ * Pick a random mimicable emoji
+ * @return {Integer} Unicoded emoji
+ */
+function chooseRandomEmoji() {
+  
+    return emojis[Math.floor(Math.random()*emojis.length)];
+
+}
+
+/**
+ * Helper functions
+ */
 
 /**
  * Find the center point for anchoring
@@ -243,5 +287,19 @@ function findProperEmojiFont(points) {
   return pointArray[pointArray.length - 1].y - pointArray[0].y;
 
 }
+
+// NOTE:
+// - Remember to call your update function from the "onImageResultsSuccess" event handler above
+// - You can use setTargetEmoji() and setScore() functions to update the respective elements
+// - You will have to pass in emojis as unicode values, e.g. setTargetEmoji(128578) for a simple smiley
+// - Unicode values for all emojis recognized by Affectiva are provided above in the list 'emojis'
+// - To check for a match, you can convert the dominant emoji to unicode using the toUnicode() function
+
+// Optional:
+// - Define an initialization/reset function, and call it from the "onInitializeSuccess" event handler above
+// - Define a game reset function (same as init?), and call it from the onReset() function above
+
+
+
 
 
