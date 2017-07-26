@@ -157,7 +157,7 @@ function drawFeaturePoints(canvas, img, face) {
     // TODO: Draw feature point, e.g. as a circle using ctx.arc()
     // See: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/arc
     ctx.beginPath();
-    ctx.arc(featurePoint['x'],featurePoint['y'], 3, 0, 3 * Math.PI);
+    ctx.arc(featurePoint.x,featurePoint.y, 3, 0, 3 * Math.PI);
     ctx.stroke();
   }
 }
@@ -168,12 +168,17 @@ function drawEmoji(canvas, img, face) {
   var ctx = canvas.getContext('2d');
 
   // TODO: Set the font and style you want for the emoji
-  // <your code here>
+  var fontSize = findProperEmojiFont(face.featurePoints);
+
+  ctx.font = fontSize + "px Georgia";
   
   // TODO: Draw it using ctx.strokeText() or fillText()
   // See: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/fillText
   // TIP: Pick a particular feature point as an anchor so that the emoji sticks to your face
-  // <your code here>
+  var center = findCenter(face.featurePoints);
+
+  ctx.fillText(face.emojis.dominantEmoji, center.x - fontSize / 2, center.y + fontSize / 2);
+
 }
 
 // TODO: Define any variables and functions to implement the Mimic Me! game mechanics
@@ -189,4 +194,54 @@ function drawEmoji(canvas, img, face) {
 // - Define an initialization/reset function, and call it from the "onInitializeSuccess" event handler above
 // - Define a game reset function (same as init?), and call it from the onReset() function above
 
-// <your code here>
+/**
+ * Find the center point for anchoring
+ * @param  {Array} points All points
+ * @return {Object}        A center point object
+ */
+function findCenter(points) {
+  
+  var xSum = 0, ySum = 0, length = Object.keys(points).length;
+
+  for (var id in points) {
+
+    xSum += points[id].x;
+
+    ySum += points[id].y;
+
+  }
+
+  return {
+    x : xSum / length,
+    y : ySum / length
+  };
+
+}
+
+/**
+ * Find the property emoji size by comparing the max and min y coords
+ * @param  {Array} points All points
+ * @return {Integer}        Font size
+ */
+function findProperEmojiFont(points) {
+  
+  // convert points to sortable arrays
+  var pointArray = Object.keys(points).map(function(key) {
+
+    return points[key];
+
+  });
+
+  // sort the array by y coordinates
+  pointArray.sort(function(a, b) {
+
+    return a.y - b.y;
+
+  });
+
+  // find the diffrence between largest y and smalled y
+  return pointArray[pointArray.length - 1].y - pointArray[0].y;
+
+}
+
+
